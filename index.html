@@ -3,23 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自动播放音乐</title>
+    <title>NFC 播放音乐</title>
 </head>
 <body>
-    <audio id="audioPlayer" controls autoplay>
-        <source src="https://www.kumeiwp.com/wj/156212/2023/07/19/5d6aced89c34df1818e99d162f3e4dfa.mp3" type="audio/mpeg">
-        您的浏览器不支持音频元素。
-    </audio>
+    <h1>NFC 音乐播放示例</h1>
+    <p>使用 NFC 触碰设备以播放音乐。</p>
 
     <script>
-        // 获取音频播放器元素
-        const audioPlayer = document.getElementById('audioPlayer');
+        if ('NFCReader' in window) {
+            const nfcReader = new NFCReader();
 
-        // 尝试播放音频并处理错误
-        audioPlayer.play().catch(function(error) {
-            console.error('播放音频时出错:', error);
-            alert("请手动点击播放按钮以开始音乐。");
-        });
+            nfcReader.onreading = (event) => {
+                const message = event.message;
+                for (const record of message.records) {
+                    if (record.recordType === 'url') {
+                        const audioUrl = new TextDecoder().decode(record.data);
+                        window.open(audioUrl, '_self');
+                    }
+                }
+            };
+
+            nfcReader.onerror = (error) => {
+                console.error('NFC 读取错误:', error);
+                alert('无法读取 NFC 标签。请确保设备支持 NFC 并启用功能。');
+            };
+
+            nfcReader.scan().catch((err) => {
+                console.error('NFC 初始化失败:', err);
+                alert('NFC 初始化失败，请检查设备是否支持 NFC。');
+            });
+        } else {
+            alert('您的设备不支持 NFC 功能。');
+        }
     </script>
 </body>
 </html>
